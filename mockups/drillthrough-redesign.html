@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Drill-Through Redesign — Project Specific Deep Dive</title>
+<style>
+  :root{
+    --brand:#E8731A;          /* Wolverine orange  */
+    --brand-soft:#FDF1E8;
+    --ink:#1f2430;
+    --muted:#6b7280;
+    --line:#e7e9ee;
+    --bg:#f4f5f7;
+    --card:#ffffff;
+    --good:#1f9d6b;
+    --bad:#d1453b;
+    --labour:#2f6fde;
+    --equip:#8a51d6;
+    --third:#0f9d9d;
+    --mat:#c9912a;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(16,24,40,.06), 0 4px 16px rgba(16,24,40,.06);
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);padding:24px;}
+  .canvas{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+
+  /* ---------- HEADER ---------- */
+  .header{
+    background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    border-top:4px solid var(--brand);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;
+  }
+  .header .left{display:flex;align-items:center;gap:14px;}
+  .back{
+    width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--muted);cursor:pointer;background:#fff;
+    transition:.15s;
+  }
+  .back:hover{background:var(--brand-soft);color:var(--brand);border-color:var(--brand);}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo .mark{width:34px;height:34px;border-radius:8px;background:var(--brand);
+    color:#fff;font-weight:800;display:grid;place-items:center;font-size:18px;}
+  .logo .name{font-weight:700;letter-spacing:.5px;font-size:13px;line-height:1.1;}
+  .logo .name span{display:block;font-weight:400;font-size:10px;color:var(--muted);letter-spacing:1px;}
+  .titles{text-align:center;flex:1;}
+  .titles h1{margin:0;font-size:20px;}
+  .titles .sub{color:var(--brand);font-weight:600;font-size:13px;margin-top:2px;}
+  .meta{text-align:right;font-size:12px;color:var(--muted);line-height:1.5;}
+  .meta b{color:var(--ink);}
+
+  /* ---------- KPI ROW ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  .kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:16px 18px;position:relative;overflow:hidden;}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand);opacity:.85;}
+  .kpi .label{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+  .kpi .value{font-size:26px;font-weight:700;margin-top:6px;letter-spacing:-.5px;}
+  .kpi .delta{font-size:11px;margin-top:6px;display:inline-flex;gap:4px;align-items:center;}
+  .kpi .delta.up{color:var(--good);}
+  .kpi .delta.down{color:var(--bad);}
+  .kpi .delta .pill{background:#eef7f2;color:var(--good);border-radius:20px;padding:1px 7px;font-weight:600;}
+  .kpi .delta.down .pill{background:#fdeceb;color:var(--bad);}
+
+  /* ---------- MAIN GRID ---------- */
+  .main{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start;}
+  .panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+  .panel .phead{display:flex;align-items:center;justify-content:space-between;
+    padding:13px 16px;border-bottom:1px solid var(--line);}
+  .panel .phead h2{margin:0;font-size:13px;font-weight:700;}
+  .panel .phead .hint{font-size:11px;color:var(--muted);}
+
+  /* matrix */
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
+    text-align:left;padding:9px 14px;font-weight:600;background:#fbfbfc;border-bottom:1px solid var(--line);}
+  thead th.num{text-align:right;}
+  tbody td{padding:8px 14px;border-bottom:1px solid #f1f2f5;}
+  tbody td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  tbody tr:hover{background:#fafbff;}
+  .grp-row td{background:#f7f8fa;font-weight:700;font-size:11px;}
+  .grp-row .chip{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:8px;vertical-align:middle;}
+  .c-labour{background:var(--labour);} .c-equip{background:var(--equip);}
+  .c-third{background:var(--third);} .c-mat{background:var(--mat);}
+  .sub td{color:var(--muted);font-weight:600;}
+  /* data bar */
+  .bar{position:relative;}
+  .bar .fill{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+    height:14px;background:linear-gradient(90deg,#f6c9a6,var(--brand));border-radius:4px;opacity:.35;}
+  .bar span{position:relative;}
+  .tfoot td{font-weight:700;background:#fff;border-top:2px solid var(--line);}
+
+  /* right column */
+  .rcol{display:flex;flex-direction:column;gap:16px;}
+  .bars-chart{display:flex;align-items:flex-end;gap:14px;padding:18px 16px 12px;height:170px;}
+  .week{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+  .stack{width:30px;border-radius:5px 5px 0 0;overflow:hidden;display:flex;flex-direction:column-reverse;box-shadow:var(--shadow);}
+  .stack i{display:block;}
+  .week .wlabel{font-size:10px;color:var(--muted);}
+  .week .wtot{font-size:11px;font-weight:700;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;padding:0 16px 14px;font-size:11px;color:var(--muted);}
+  .legend .li{display:flex;align-items:center;gap:6px;}
+  .legend .dot{width:9px;height:9px;border-radius:3px;}
+
+  .donut-wrap{display:flex;align-items:center;gap:20px;padding:16px;}
+  .donut{width:120px;height:120px;border-radius:50%;flex:none;
+    background:conic-gradient(var(--labour) 0 46%, var(--equip) 46% 73%, var(--third) 73% 90%, var(--mat) 90% 100%);
+    display:grid;place-items:center;}
+  .donut .hole{width:78px;height:78px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center;}
+  .donut .hole b{font-size:18px;} .donut .hole small{font-size:9px;color:var(--muted);display:block;}
+  .breakdown{flex:1;display:flex;flex-direction:column;gap:9px;font-size:12px;}
+  .breakdown .row{display:flex;align-items:center;justify-content:space-between;}
+  .breakdown .row .l{display:flex;align-items:center;gap:8px;}
+  .breakdown .dot{width:10px;height:10px;border-radius:3px;}
+  .breakdown .amt{font-weight:700;font-variant-numeric:tabular-nums;}
+
+  .note{font-size:11px;color:var(--muted);text-align:center;padding:4px 0 0;}
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="left">
+      <div class="back">&larr;</div>
+      <div class="logo">
+        <div class="mark">W</div>
+        <div class="name">WOLVERINE<span>CONTRACTING &amp; ENGINEERING</span></div>
+      </div>
+    </div>
+    <div class="titles">
+      <h1>Project Specific Deep Dive</h1>
+      <div class="sub">Shell — Maintenance Support 2026 · #85485360</div>
+    </div>
+    <div class="meta">
+      Data date: <b>17-Jun-26</b><br/>
+      Refreshed: <b>19-Jun-26 5:39 AM</b>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpis">
+    <div class="kpi">
+      <div class="label">Actual Cost</div>
+      <div class="value">$1.61M</div>
+      <div class="delta up"><span class="pill">82%</span> of $1.96M budget</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Actual Hours</div>
+      <div class="value">18,730</div>
+      <div class="delta up"><span class="pill">+4.1%</span> vs last period</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Planned Hours</div>
+      <div class="value">21,500</div>
+      <div class="delta up"><span class="pill">on track</span></div>
+    </div>
+    <div class="kpi">
+      <div class="label">% Hours Used</div>
+      <div class="value">87%</div>
+      <div class="delta down"><span class="pill">2,770</span> hrs remaining</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Employees</div>
+      <div class="value">74</div>
+      <div class="delta up"><span class="pill">41 FTE</span> this week</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- PRIMARY MATRIX -->
+    <div class="panel">
+      <div class="phead">
+        <h2>Cost Detail by Type</h2>
+        <span class="hint">grouped · expand a row for transactions</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Cost Type / Item</th>
+            <th>Trade</th>
+            <th class="num">Hours</th>
+            <th class="num">$ Incurred</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- LABOUR -->
+          <tr class="grp-row"><td><span class="chip c-labour"></span>Labour</td><td></td><td class="num">9,840</td><td class="num bar"><span class="fill" style="width:80%"></span><span>$742,300</span></td></tr>
+          <tr class="sub"><td style="padding-left:34px">Schouten, Casey</td><td>QC-ADV</td><td class="num">412</td><td class="num">$58,140</td></tr>
+          <tr class="sub"><td style="padding-left:34px">Veenendaal, Tyler</td><td>Pipefit</td><td class="num">388</td><td class="num">$49,920</td></tr>
+          <tr class="sub"><td style="padding-left:34px">Lambton Alloys crew</td><td>Welder</td><td class="num">1,204</td><td class="num">$162,540</td></tr>
+
+          <!-- EQUIP -->
+          <tr class="grp-row"><td><span class="chip c-equip"></span>Equipment</td><td></td><td class="num">5,210</td><td class="num bar"><span class="fill" style="width:46%"></span><span>$421,800</span></td></tr>
+          <tr class="sub"><td style="padding-left:34px">Trailer — Flat Deck 10'-24'</td><td>Rental</td><td class="num">96</td><td class="num">$12,000</td></tr>
+          <tr class="sub"><td style="padding-left:34px">1/2T Truck — H</td><td>Rental</td><td class="num">540</td><td class="num">$48,600</td></tr>
+
+          <!-- 3RD PARTY -->
+          <tr class="grp-row"><td><span class="chip c-third"></span>3rd Party</td><td></td><td class="num">2,980</td><td class="num bar"><span class="fill" style="width:38%"></span><span>$352,400</span></td></tr>
+          <tr class="sub"><td style="padding-left:34px">Wolverine Toolcrib</td><td>Supply</td><td class="num">0</td><td class="num">$6,035</td></tr>
+          <tr class="sub"><td style="padding-left:34px">TSSA — Vendor</td><td>Inspect</td><td class="num">0</td><td class="num">$446</td></tr>
+
+          <!-- MATERIALS -->
+          <tr class="grp-row"><td><span class="chip c-mat"></span>Materials</td><td></td><td class="num">700</td><td class="num bar"><span class="fill" style="width:10%"></span><span>$93,700</span></td></tr>
+          <tr class="sub"><td style="padding-left:34px">Lambton Alloys</td><td>Consum.</td><td class="num">0</td><td class="num">$20,140</td></tr>
+        </tbody>
+        <tfoot>
+          <tr class="tfoot"><td>Total</td><td></td><td class="num">18,730</td><td class="num">$1,610,200</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="rcol">
+
+      <!-- FTE TREND -->
+      <div class="panel">
+        <div class="phead"><h2>FTE — Last 6 Weeks</h2><span class="hint">headcount by cost type</span></div>
+        <div class="bars-chart">
+          <!-- each stack: labour / equip / third / mat heights in px -->
+          <div class="week"><span class="wtot">43</span><div class="stack" style="height:130px">
+            <i class="c-labour" style="height:78px"></i><i class="c-equip" style="height:30px"></i><i class="c-third" style="height:14px"></i><i class="c-mat" style="height:8px"></i></div><span class="wlabel">May 03</span></div>
+          <div class="week"><span class="wtot">41</span><div class="stack" style="height:124px">
+            <i class="c-labour" style="height:74px"></i><i class="c-equip" style="height:28px"></i><i class="c-third" style="height:14px"></i><i class="c-mat" style="height:8px"></i></div><span class="wlabel">May 10</span></div>
+          <div class="week"><span class="wtot">36</span><div class="stack" style="height:108px">
+            <i class="c-labour" style="height:64px"></i><i class="c-equip" style="height:26px"></i><i class="c-third" style="height:12px"></i><i class="c-mat" style="height:6px"></i></div><span class="wlabel">May 17</span></div>
+          <div class="week"><span class="wtot">36</span><div class="stack" style="height:108px">
+            <i class="c-labour" style="height:62px"></i><i class="c-equip" style="height:28px"></i><i class="c-third" style="height:12px"></i><i class="c-mat" style="height:6px"></i></div><span class="wlabel">May 24</span></div>
+          <div class="week"><span class="wtot">37</span><div class="stack" style="height:112px">
+            <i class="c-labour" style="height:66px"></i><i class="c-equip" style="height:28px"></i><i class="c-third" style="height:12px"></i><i class="c-mat" style="height:6px"></i></div><span class="wlabel">May 31</span></div>
+          <div class="week"><span class="wtot">41</span><div class="stack" style="height:124px">
+            <i class="c-labour" style="height:74px"></i><i class="c-equip" style="height:28px"></i><i class="c-third" style="height:14px"></i><i class="c-mat" style="height:8px"></i></div><span class="wlabel">Jun 07</span></div>
+        </div>
+        <div class="legend">
+          <div class="li"><span class="dot c-labour"></span>Labour</div>
+          <div class="li"><span class="dot c-equip"></span>Equipment</div>
+          <div class="li"><span class="dot c-third"></span>3rd Party</div>
+          <div class="li"><span class="dot c-mat"></span>Materials</div>
+        </div>
+      </div>
+
+      <!-- COST MIX DONUT -->
+      <div class="panel">
+        <div class="phead"><h2>Cost Mix</h2><span class="hint">share of $ incurred</span></div>
+        <div class="donut-wrap">
+          <div class="donut"><div class="hole"><div><b>$1.61M</b><small>TOTAL</small></div></div></div>
+          <div class="breakdown">
+            <div class="row"><div class="l"><span class="dot c-labour"></span>Labour</div><span class="amt">$742K · 46%</span></div>
+            <div class="row"><div class="l"><span class="dot c-equip"></span>Equipment</div><span class="amt">$422K · 26%</span></div>
+            <div class="row"><div class="l"><span class="dot c-third"></span>3rd Party</div><span class="amt">$352K · 22%</span></div>
+            <div class="row"><div class="l"><span class="dot c-mat"></span>Materials</div><span class="amt">$94K · 6%</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note">Mockup — drill-through scoped to one project, so the right-side filter panel is removed. Numbers illustrative, based on the source screenshot.</div>
+</div>
+</body>
+</html>
