@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wolverine / Shell Maintenance — KPI Report</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',-apple-system,Roboto,Helvetica,Arial,sans-serif;background:#D7DDE3;color:#1B2B3A;-webkit-font-smoothing:antialiased}
+.nav{position:sticky;top:0;z-index:20;background:#0E2233;color:#fff;display:flex;gap:8px;align-items:center;padding:10px 22px;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.nav b{font-size:14px;letter-spacing:.3px;margin-right:14px}
+.nav a{color:#cdd8e2;text-decoration:none;font-size:12.5px;padding:6px 14px;border-radius:20px;background:rgba(255,255,255,.06)}
+.nav a:hover{background:rgba(255,255,255,.16);color:#fff}
+.nav .sp{flex:1}.nav small{color:#8aa0b3;font-size:11px}
+.page{width:1280px;margin:22px auto;background:#EEF1F4;border-radius:14px;overflow:hidden;box-shadow:0 12px 34px rgba(15,34,51,.18)}
+.rpt-head{background:linear-gradient(120deg,#13314A,#0E2233);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:16px 24px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
+.logo.wolv{background:#E8651E;color:#fff}.logo.shell{background:#F6C700;color:#D6122A}
+.htitle h1{font-size:18px;font-weight:700;letter-spacing:.2px}
+.hsub{font-size:12px;color:#a9bccd;text-transform:uppercase;letter-spacing:1.4px;margin-top:2px}
+.hmeta{display:flex;gap:26px}
+.hmeta div{display:flex;flex-direction:column;text-align:right}
+.hmeta span{font-size:10px;color:#90a6b8;text-transform:uppercase;letter-spacing:.8px}
+.hmeta b{font-size:13px;font-weight:600;margin-top:2px}
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:16px 20px 4px}
+.kpi{background:#FFFFFF;border:1px solid #E2E7EC;border-radius:11px;padding:13px 14px;box-shadow:0 1px 2px rgba(15,34,51,.04)}
+.kpi-top{display:flex;justify-content:space-between;align-items:center}
+.kpi-label{font-size:11px;color:#6B7B8A;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.dot{width:9px;height:9px;border-radius:50%}
+.kpi-val{font-size:27px;font-weight:700;color:#0E2233;margin-top:6px;line-height:1}
+.kpi-unit{font-size:14px;font-weight:600;color:#6B7B8A;margin-left:2px}
+.kpi-mid{display:flex;justify-content:space-between;align-items:flex-end;min-height:34px;margin-top:6px}
+.kpi-tgt{font-size:11px;color:#5B6B7A;font-weight:600;background:#eef2f6;padding:2px 8px;border-radius:10px}
+.spark{width:120px;height:34px}
+.kpi-foot{font-size:10.5px;color:#6B7B8A;margin-top:6px;border-top:1px solid #E2E7EC;padding-top:6px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;padding:14px 20px 22px}
+.panel{background:#FFFFFF;border:1px solid #E2E7EC;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,34,51,.05);display:flex;flex-direction:column}
+.w3{grid-column:span 3}.w4{grid-column:span 4}.w6{grid-column:span 6}
+.c-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;border-bottom:1px solid #E2E7EC;padding-bottom:8px}
+.c-head h3{font-size:13.5px;font-weight:700;color:#0E2233}
+.c-sub{font-size:10.5px;color:#6B7B8A}
+.hbars{display:flex;flex-direction:column;gap:11px;flex:1;justify-content:center}
+.hb-row{display:flex;align-items:center;gap:10px}
+.hb-lab{width:96px;font-size:12px;color:#1B2B3A;font-weight:600;flex-shrink:0}
+.hb-track{flex:1;background:#f1f4f7;border-radius:6px;height:18px;display:flex;overflow:hidden}
+.hb-fill{height:100%;border-radius:0}
+.hb-val{width:60px;text-align:right;font-size:12px;font-weight:700;color:#0E2233}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px}
+.legend.mini{margin-top:8px}
+.lg{display:flex;align-items:center;gap:6px;font-size:11px;color:#5B6B7A}
+.lg b{color:#0E2233}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;flex:1;justify-content:center}
+.donut{width:150px;height:150px}
+.dn-top{text-anchor:middle;font-size:21px;font-weight:800;fill:#0E2233}
+.dn-bot{text-anchor:middle;font-size:9px;fill:#6B7B8A;text-transform:uppercase;letter-spacing:.6px}
+.stacked{flex:1;display:flex;flex-direction:column;justify-content:center}
+.st-bar{height:30px;border-radius:7px;overflow:hidden;display:flex;background:#eee}
+.st-seg{height:100%}
+.cols{width:100%;height:auto}
+.cx-lab{text-anchor:middle;font-size:10px;fill:#6B7B8A}
+.cx-val{text-anchor:middle;font-size:9.5px;font-weight:700;fill:#0E2233}
+.cx-tgt{text-anchor:end;font-size:8.5px;fill:#D6453D}
+.bullets{display:flex;flex-direction:column;gap:13px;flex:1;justify-content:center}
+.bullet .bl-head{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:5px}
+.bl-track{position:relative;height:14px;background:#f1f4f7;border-radius:7px}
+.bl-fill{height:100%;border-radius:7px}
+.bl-target{position:absolute;top:-3px;width:3px;height:20px;background:#0E2233;border-radius:2px}
+.bl-target.inline{position:relative;display:inline-block;top:3px;height:12px;margin-right:4px}
+.bl-note{font-size:10px;color:#6B7B8A;margin-top:2px}
+.gauge svg{width:100%;height:auto}
+.g-val{text-anchor:middle;font-size:24px;font-weight:800;fill:#0E2233}
+.g-lab{text-anchor:middle;font-size:9.5px;fill:#6B7B8A}
+.mini-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex:1;align-items:center}
+.mk{background:#f6f8fa;border-radius:9px;padding:12px;text-align:center;font-size:11px;color:#6B7B8A;font-weight:600}
+.mk span{display:block;font-size:22px;font-weight:800;color:#0E2233;margin-bottom:3px}
+.lag-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:16px 20px 4px}
+.lag{background:#FFFFFF;border:1px solid #E2E7EC;border-left:4px solid #2E9E5B;border-radius:10px;padding:13px 14px;display:flex;flex-direction:column}
+.lag.warn{border-left-color:#E8A33D}
+.lag-v{font-size:26px;font-weight:800;color:#0E2233;line-height:1}
+.lag-l{font-size:11.5px;font-weight:600;color:#1B2B3A;margin-top:5px}
+.lag-u{font-size:10px;color:#6B7B8A;margin-top:1px}
+.note-band{margin:0 20px 20px;background:#eaf4ee;border:1px solid #cfe6d8;border-radius:10px;padding:11px 16px;font-size:12px;color:#1d5a37;font-weight:500}
+.foot{width:1280px;margin:8px auto 30px;font-size:11px;color:#5a6b7a;text-align:center}
+@media print{body{background:#fff}.nav{position:static}.page{box-shadow:none;margin:0 0 12px;page-break-after:always;width:100%}.foot{width:100%}}
+</style></head>
+<body>
+<nav class="nav"><b>WOLVERINE &times; SHELL · KPI REVIEW</b>
+  <a href="#p1">Performance &amp; Cost</a><a href="#p2">HSSE &amp; Safety</a>
+  <span class="sp"></span><small>Self-contained · no scripts · Power BI HTML-visual ready</small></nav>
+
+    <div class="page" id="p1">
+      <header class="rpt-head" style="border-top:4px solid #E8651E">
+      <div class="brand">
+        <div class="logo wolv">W</div>
+        <div class="logo shell">S</div>
+        <div class="htitle"><h1>Wolverine / Shell Maintenance — KPIs</h1>
+          <div class="hsub">Performance &amp; Cost</div></div>
+      </div>
+      <div class="hmeta">
+        <div><span>Reporting Period</span><b>June 2026</b></div>
+        <div><span>Data Date</span><b>17-Jun-26</b></div>
+        <div><span>Refreshed</span><b>19-Jun-26 9:40 AM</b></div>
+      </div>
+    </header>
+      <div class="kpi-strip"><div class="kpi">
+      <div class="kpi-top"><span class="kpi-label">Total Exposure Hours</span><span class="dot" style="background:#2E9E5B"></span></div>
+      <div class="kpi-val">844<span class="kpi-unit"></span></div>
+      <div class="kpi-mid"><svg class="spark" viewBox="0 0 120 34" preserveAspectRatio="none"><polygon points="0,34 0.0,30.0 24.0,30.0 48.0,4.0 72.0,5.9 96.0,25.9 120.0,24.8 120,34" fill="#2E7BB5" opacity="0.10"/><polyline points="0.0,30.0 24.0,30.0 48.0,4.0 72.0,5.9 96.0,25.9 120.0,24.8" fill="none" stroke="#2E7BB5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="120.0" cy="24.8" r="2.6" fill="#2E7BB5"/></svg></div>
+      <div class="kpi-foot">Field + indirect, YTD</div>
+    </div><div class="kpi">
+      <div class="kpi-top"><span class="kpi-label">Workforce Headcount</span><span class="dot" style="background:#2E9E5B"></span></div>
+      <div class="kpi-val">50<span class="kpi-unit"></span></div>
+      <div class="kpi-mid"></div>
+      <div class="kpi-foot">13 site indirects (billable)</div>
+    </div><div class="kpi">
+      <div class="kpi-top"><span class="kpi-label">Labour Spend</span><span class="dot" style="background:#2E9E5B"></span></div>
+      <div class="kpi-val">$73K<span class="kpi-unit"></span></div>
+      <div class="kpi-mid"><svg class="spark" viewBox="0 0 120 34" preserveAspectRatio="none"><polygon points="0,34 0.0,30.0 24.0,30.0 48.0,4.0 72.0,5.9 96.0,27.3 120.0,19.3 120,34" fill="#E8651E" opacity="0.10"/><polyline points="0.0,30.0 24.0,30.0 48.0,4.0 72.0,5.9 96.0,27.3 120.0,19.3" fill="none" stroke="#E8651E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="120.0" cy="19.3" r="2.6" fill="#E8651E"/></svg></div>
+      <div class="kpi-foot">$79K total cost YTD</div>
+    </div><div class="kpi">
+      <div class="kpi-top"><span class="kpi-label">Apprentice Ratio</span><span class="dot" style="background:#2E9E5B"></span></div>
+      <div class="kpi-val">8<span class="kpi-unit">%</span></div>
+      <div class="kpi-mid"><span class="kpi-tgt">per collective</span></div>
+      <div class="kpi-foot">66 apprentice hrs</div>
+    </div><div class="kpi">
+      <div class="kpi-top"><span class="kpi-label">RT : DT Ratio</span><span class="dot" style="background:#E8A33D"></span></div>
+      <div class="kpi-val">7.7:1<span class="kpi-unit"></span></div>
+      <div class="kpi-mid"><span class="kpi-tgt">target ≥10:1</span></div>
+      <div class="kpi-foot">747 reg / 96 double-time hrs</div>
+    </div><div class="kpi">
+      <div class="kpi-top"><span class="kpi-label">Vehicle Hours Billed</span><span class="dot" style="background:#2E9E5B"></span></div>
+      <div class="kpi-val">234<span class="kpi-unit"></span></div>
+      <div class="kpi-mid"><span class="kpi-tgt">target 1:3 ppl</span></div>
+      <div class="kpi-foot">On-site trucks & vans</div>
+    </div></div>
+      <div class="grid">
+        <section class="panel w6"><header class="c-head"><h3>Exposure Hours — Monthly Trend</h3><span class="c-sub">All field + indirect hours, YTD 2026</span></header><svg viewBox="0 0 310 140" class="cols"><rect x="30" y="120.0" width="30" height="1.0" rx="3" fill="#2E7BB5" opacity="0.25"/><text x="45.0" y="134" class="cx-lab">Jan</text><rect x="76" y="120.0" width="30" height="1.0" rx="3" fill="#2E7BB5" opacity="0.25"/><text x="91.0" y="134" class="cx-lab">Feb</text><rect x="122" y="12.0" width="30" height="108.0" rx="3" fill="#2E7BB5" opacity="1"/><text x="137.0" y="134" class="cx-lab">Mar</text><text x="137.0" y="8.0" class="cx-val">369</text><rect x="168" y="19.8" width="30" height="100.2" rx="3" fill="#2E7BB5" opacity="1"/><text x="183.0" y="134" class="cx-lab">Apr</text><text x="183.0" y="15.8" class="cx-val">342</text><rect x="214" y="103.0" width="30" height="17.0" rx="3" fill="#2E7BB5" opacity="1"/><text x="229.0" y="134" class="cx-lab">May</text><text x="229.0" y="99.0" class="cx-val">58</text><rect x="260" y="98.3" width="30" height="21.7" rx="3" fill="#2E7BB5" opacity="1"/><text x="275.0" y="134" class="cx-lab">Jun</text><text x="275.0" y="94.3" class="cx-val">74</text></svg></section>
+        <section class="panel w6"><header class="c-head"><h3>Hours by Trade — DFL vs Foreman&nbsp;&amp;&nbsp;above</h3><span class="c-sub">Direct field labour vs supervision</span></header><div class="hbars"><div class="hb-row"><span class="hb-lab">Pipefitter</span>
+          <div class="hb-track">
+            <div class="hb-fill" style="width:64.8%;background:#2E7BB5"></div>
+            <div class="hb-fill" style="width:35.2%;background:#E8A33D"></div>
+          </div><span class="hb-val">301h</span></div><div class="hb-row"><span class="hb-lab">Boilermaker</span>
+          <div class="hb-track">
+            <div class="hb-fill" style="width:25.4%;background:#2E7BB5"></div>
+            <div class="hb-fill" style="width:19.1%;background:#E8A33D"></div>
+          </div><span class="hb-val">134h</span></div><div class="hb-row"><span class="hb-lab">Labourer</span>
+          <div class="hb-track">
+            <div class="hb-fill" style="width:5.3%;background:#2E7BB5"></div>
+            <div class="hb-fill" style="width:0.0%;background:#E8A33D"></div>
+          </div><span class="hb-val">16h</span></div></div><div class="legend mini"><div class="lg"><span class="sw" style="background:#2E7BB5"></span>DFL (Direct Field Labour)</div><div class="lg"><span class="sw" style="background:#E8A33D"></span>Foreman &amp; above</div></div></section>
+        <section class="panel w6"><header class="c-head"><h3>Crew Mix — Foreman : Base Crew</h3><span class="c-sub">Target ratio 1:8 (marker)</span></header><div class="bullets"><div class="bullet">
+      <div class="bl-head"><span>Pipefitter</span><b style="color:#D6453D">1:1.8</b></div>
+      <div class="bl-track">
+        <div class="bl-fill" style="width:80.0%;background:#D6453D"></div>
+        <div class="bl-target" style="left:18.4%"></div>
+      </div></div><div class="bullet">
+      <div class="bl-head"><span>Boilermaker</span><b style="color:#D6453D">1:1.3</b></div>
+      <div class="bl-track">
+        <div class="bl-fill" style="width:80.0%;background:#D6453D"></div>
+        <div class="bl-target" style="left:13.3%"></div>
+      </div></div><div class="bullet">
+      <div class="bl-head"><span>Labourer</span><b style="color:#2E9E5B">1:∞</b></div>
+      <div class="bl-track">
+        <div class="bl-fill" style="width:0.0%;background:#2E9E5B"></div>
+        <div class="bl-target" style="left:80.0%"></div>
+      </div></div><div class="bl-note"><span class="bl-target inline"></span> marker = target 1 Foreman : 8 base crew</div></div></section>
+        <section class="panel w3"><header class="c-head"><h3>Charge-out Mix — RT vs DT</h3><span class="c-sub">Regular vs double time</span></header><div class="donut-wrap">
+      <svg viewBox="0 0 148 148" class="donut"><circle cx="74.0" cy="74.0" r="60.0" fill="none" stroke="#1AA191" stroke-width="20" stroke-dasharray="333.86 43.13" stroke-dashoffset="-0.00" transform="rotate(-90 74.0 74.0)"/><circle cx="74.0" cy="74.0" r="60.0" fill="none" stroke="#D6122A" stroke-width="20" stroke-dasharray="43.13 333.86" stroke-dashoffset="-333.86" transform="rotate(-90 74.0 74.0)"/>
+        <text x="74.0" y="72.0" class="dn-top">844</text>
+        <text x="74.0" y="90.0" class="dn-bot">total hrs</text></svg>
+      <div class="legend"><div class="lg"><span class="sw" style="background:#1AA191"></span>Regular Time<b>747</b></div><div class="lg"><span class="sw" style="background:#D6122A"></span>Double Time<b>96</b></div></div></div></section>
+        <section class="panel w3"><header class="c-head"><h3>Spend by Category</h3><span class="c-sub">$79K total cost YTD</span></header><div class="stacked"><div class="st-bar"><div class="st-seg" style="width:92.6%;background:#E8651E" title="Labour"></div><div class="st-seg" style="width:4.1%;background:#2E7BB5" title="3rd Party"></div><div class="st-seg" style="width:3.2%;background:#1AA191" title="Equipment"></div><div class="st-seg" style="width:0.1%;background:#6F5AA8" title="Materials"></div></div><div class="legend"><div class="lg"><span class="sw" style="background:#E8651E"></span>Labour<b>$73K</b></div><div class="lg"><span class="sw" style="background:#2E7BB5"></span>3rd Party<b>$3K</b></div><div class="lg"><span class="sw" style="background:#1AA191"></span>Equipment<b>$3K</b></div><div class="lg"><span class="sw" style="background:#6F5AA8"></span>Materials<b>$59</b></div></div></div></section>
+        <section class="panel w6"><header class="c-head"><h3>Spend by Shell Group</h3><span class="c-sub">Cost incurred by work type</span></header><div class="hbars"><div class="hb-row"><span class="hb-lab">Mtce</span>
+          <div class="hb-track"><div class="hb-fill" style="width:100.0%;background:#6F5AA8"></div></div>
+          <span class="hb-val">$56K</span></div><div class="hb-row"><span class="hb-lab">NRM</span>
+          <div class="hb-track"><div class="hb-fill" style="width:19.7%;background:#E8651E"></div></div>
+          <span class="hb-val">$11K</span></div><div class="hb-row"><span class="hb-lab">Pit Stop</span>
+          <div class="hb-track"><div class="hb-fill" style="width:15.1%;background:#1AA191"></div></div>
+          <span class="hb-val">$8K</span></div><div class="hb-row"><span class="hb-lab">Other</span>
+          <div class="hb-track"><div class="hb-fill" style="width:7.5%;background:#9AA7B2"></div></div>
+          <span class="hb-val">$4K</span></div></div></section>
+        <section class="panel w6"><header class="c-head"><h3>Portfolio at a glance</h3><span class="c-sub">Live from Projects table</span></header><div class="mini-kpis"><div class="mk"><span>64</span>Active jobs</div><div class="mk"><span>$7.70M</span>PO value (portfolio)</div><div class="mk"><span>13</span>Site indirects</div><div class="mk"><span>234</span>Vehicle hrs</div></div></section>
+      </div>
+    </div>
+    <div class="page" id="p2">
+      <header class="rpt-head" style="border-top:4px solid #D6122A">
+      <div class="brand">
+        <div class="logo wolv">W</div>
+        <div class="logo shell">S</div>
+        <div class="htitle"><h1>Wolverine / Shell Maintenance — KPIs</h1>
+          <div class="hsub">HSSE &amp; Safety</div></div>
+      </div>
+      <div class="hmeta">
+        <div><span>Reporting Period</span><b>June 2026</b></div>
+        <div><span>Data Date</span><b>17-Jun-26</b></div>
+        <div><span>Refreshed</span><b>19-Jun-26 9:40 AM</b></div>
+      </div>
+    </header>
+      <div class="lag-strip"><div class="lag good">
+              <span class="lag-v">0</span><span class="lag-l">First Aids</span><span class="lag-u">per yr</span></div><div class="lag good">
+              <span class="lag-v">0</span><span class="lag-l">Medical Treatment</span><span class="lag-u">per yr</span></div><div class="lag good">
+              <span class="lag-v">0</span><span class="lag-l">Lost Work Day</span><span class="lag-u">per yr</span></div><div class="lag warn">
+              <span class="lag-v">11</span><span class="lag-l">Near Misses</span><span class="lag-u">YTD</span></div><div class="lag good">
+              <span class="lag-v">0</span><span class="lag-l">Recordable Incidents</span><span class="lag-u">per yr</span></div><div class="lag good">
+              <span class="lag-v">0.0</span><span class="lag-l">TRIF (Sarnia)</span><span class="lag-u">YTD</span></div></div>
+      <div class="grid">
+        <section class="panel w3"><header class="c-head"><h3>Safety Observations — Latest Period</h3><span class="c-sub">June 2026: 62 cards (target 20)</span></header><div class="gauge">
+      <svg viewBox="0 0 180 104">
+        <path d="M20.0,84.0 A70,70 0 1 1 160.0,84.0" fill="none" stroke="#E2E7EC" stroke-width="16" stroke-linecap="round"/>
+        <path d="M20.0,84.0 A70,70 0 1 1 160.0,84.0" fill="none" stroke="#2E9E5B" stroke-width="16" stroke-linecap="round"/>
+        <line x1="90.0" y1="14.0" x2="90.0" y2="2.0" stroke="#0E2233" stroke-width="2.5"/>
+        <text x="90" y="74" class="g-val">62</text>
+        <text x="90" y="96" class="g-lab">vs 20 / month target</text>
+      </svg></div></section>
+        <section class="panel w6"><header class="c-head"><h3>Safety Observations — Monthly Trend</h3><span class="c-sub">834 cards YTD vs 20/mo target</span></header><svg viewBox="0 0 310 140" class="cols"><line x1="22" y1="85.2" x2="298" y2="85.2" stroke="#D6453D" stroke-width="1.5" stroke-dasharray="4 3"/><text x="296" y="81.2" class="cx-tgt">target 20</text><rect x="30" y="12.0" width="30" height="108.0" rx="3" fill="#2E9E5B" opacity="1"/><text x="45.0" y="134" class="cx-lab">Jan</text><text x="45.0" y="8.0" class="cx-val">62</text><rect x="76" y="78.2" width="30" height="41.8" rx="3" fill="#2E9E5B" opacity="1"/><text x="91.0" y="134" class="cx-lab">Feb</text><text x="91.0" y="74.2" class="cx-val">24</text><rect x="122" y="45.1" width="30" height="74.9" rx="3" fill="#2E9E5B" opacity="1"/><text x="137.0" y="134" class="cx-lab">Mar</text><text x="137.0" y="41.1" class="cx-val">43</text><rect x="168" y="57.3" width="30" height="62.7" rx="3" fill="#2E9E5B" opacity="1"/><text x="183.0" y="134" class="cx-lab">Apr</text><text x="183.0" y="53.3" class="cx-val">36</text><rect x="214" y="109.5" width="30" height="10.5" rx="3" fill="#2E9E5B" opacity="1"/><text x="229.0" y="134" class="cx-lab">May</text><text x="229.0" y="105.5" class="cx-val">6</text><rect x="260" y="120.0" width="30" height="1.0" rx="3" fill="#2E9E5B" opacity="0.25"/><text x="275.0" y="134" class="cx-lab">Jun</text></svg></section>
+        <section class="panel w3"><header class="c-head"><h3>Training Compliance</h3><span class="c-sub">Workforce current on training</span></header><div class="gauge">
+      <svg viewBox="0 0 180 104">
+        <path d="M20.0,84.0 A70,70 0 1 1 160.0,84.0" fill="none" stroke="#E2E7EC" stroke-width="16" stroke-linecap="round"/>
+        <path d="M20.0,84.0 A70,70 0 1 1 160.0,84.0" fill="none" stroke="#2E9E5B" stroke-width="16" stroke-linecap="round"/>
+        <line x1="160.0" y1="84.0" x2="172.0" y2="84.0" stroke="#0E2233" stroke-width="2.5"/>
+        <text x="90" y="74" class="g-val">100%</text>
+        <text x="90" y="96" class="g-lab">compliance</text>
+      </svg></div></section>
+        <section class="panel w4"><header class="c-head"><h3>Learning Cards by Category</h3><span class="c-sub">Learner mindset breakdown</span></header><div class="hbars"><div class="hb-row"><span class="hb-lab">Hazard ID</span>
+          <div class="hb-track"><div class="hb-fill" style="width:100.0%;background:#D6122A"></div></div>
+          <span class="hb-val">82</span></div><div class="hb-row"><span class="hb-lab">Recognition</span>
+          <div class="hb-track"><div class="hb-fill" style="width:45.1%;background:#2E9E5B"></div></div>
+          <span class="hb-val">37</span></div><div class="hb-row"><span class="hb-lab">Pause Moment</span>
+          <div class="hb-track"><div class="hb-fill" style="width:43.9%;background:#2E7BB5"></div></div>
+          <span class="hb-val">36</span></div><div class="hb-row"><span class="hb-lab">Peer to Peer Intervention</span>
+          <div class="hb-track"><div class="hb-fill" style="width:31.7%;background:#6F5AA8"></div></div>
+          <span class="hb-val">26</span></div><div class="hb-row"><span class="hb-lab">Near Miss</span>
+          <div class="hb-track"><div class="hb-fill" style="width:13.4%;background:#E8A33D"></div></div>
+          <span class="hb-val">11</span></div></div></section>
+        <section class="panel w4"><header class="c-head"><h3>By Functional Department</h3><span class="c-sub">Top reporting groups</span></header><div class="hbars"><div class="hb-row"><span class="hb-lab">MCTA Leadership</span>
+          <div class="hb-track"><div class="hb-fill" style="width:100.0%;background:#2E7BB5"></div></div>
+          <span class="hb-val">94</span></div><div class="hb-row"><span class="hb-lab">Shell Maintenance</span>
+          <div class="hb-track"><div class="hb-fill" style="width:25.5%;background:#2E7BB5"></div></div>
+          <span class="hb-val">24</span></div><div class="hb-row"><span class="hb-lab">Contractor Partner</span>
+          <div class="hb-track"><div class="hb-fill" style="width:22.3%;background:#2E7BB5"></div></div>
+          <span class="hb-val">21</span></div><div class="hb-row"><span class="hb-lab">Turnaround</span>
+          <div class="hb-track"><div class="hb-fill" style="width:18.1%;background:#2E7BB5"></div></div>
+          <span class="hb-val">17</span></div><div class="hb-row"><span class="hb-lab">Projects</span>
+          <div class="hb-track"><div class="hb-fill" style="width:13.8%;background:#2E7BB5"></div></div>
+          <span class="hb-val">13</span></div><div class="hb-row"><span class="hb-lab">Engineering</span>
+          <div class="hb-track"><div class="hb-fill" style="width:9.6%;background:#2E7BB5"></div></div>
+          <span class="hb-val">9</span></div></div></section>
+        <section class="panel w4"><header class="c-head"><h3>By Site Location</h3><span class="c-sub">Where hazards are spotted</span></header><div class="hbars"><div class="hb-row"><span class="hb-lab">Isomax / No 2 Crude</span>
+          <div class="hb-track"><div class="hb-fill" style="width:100.0%;background:#1AA191"></div></div>
+          <span class="hb-val">63</span></div><div class="hb-row"><span class="hb-lab">FCCU / No 1 Crude</span>
+          <div class="hb-track"><div class="hb-fill" style="width:28.6%;background:#1AA191"></div></div>
+          <span class="hb-val">18</span></div><div class="hb-row"><span class="hb-lab">Tank Farm</span>
+          <div class="hb-track"><div class="hb-fill" style="width:23.8%;background:#1AA191"></div></div>
+          <span class="hb-val">15</span></div><div class="hb-row"><span class="hb-lab">Maintenance Shops</span>
+          <div class="hb-track"><div class="hb-fill" style="width:22.2%;background:#1AA191"></div></div>
+          <span class="hb-val">14</span></div><div class="hb-row"><span class="hb-lab">Buildings / Trailers</span>
+          <div class="hb-track"><div class="hb-fill" style="width:15.9%;background:#1AA191"></div></div>
+          <span class="hb-val">10</span></div><div class="hb-row"><span class="hb-lab">Chem Plant</span>
+          <div class="hb-track"><div class="hb-fill" style="width:14.3%;background:#1AA191"></div></div>
+          <span class="hb-val">9</span></div></div></section>
+      </div>
+      <div class="note-band">Leading indicators (proactive): 834 learning cards logged YTD &middot;
+        zero recordable incidents &middot; data refreshes automatically on workbook update.</div>
+    </div>
+<div class="foot">Generated from Data.xlsx, KPI_Template_2026.xlsm &amp; Safety_Learning_Cards.xlsx ·
+Re-run generate_kpi_report.py after each data refresh · Targets sourced from client 2026 KPI template.</div>
+</body></html>
