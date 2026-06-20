@@ -1,0 +1,35 @@
+{
+  "name": "Wolverine KPI Theme",
+  "dataColors": [
+    "#E8731A", "#2F6FDE", "#1F9D6B", "#8A51D6",
+    "#C9912A", "#D1453B", "#0F9D9D", "#6B7280"
+  ],
+  "background": "#F4F5F7",
+  "foreground": "#1F2430",
+  "tableAccent": "#E8731A",
+  "textClasses": {
+    "title":    { "fontFace": "Segoe UI Semibold", "fontSize": 14, "color": "#1F2430" },
+    "header":   { "fontFace": "Segoe UI Semibold", "fontSize": 11, "color": "#6B7280" },
+    "callout":  { "fontFace": "Segoe UI Semibold", "fontSize": 24, "color": "#1F2430" },
+    "label":    { "fontFace": "Segoe UI", "fontSize": 10, "color": "#6B7280" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EEF0F3" } }, "radius": 12 }],
+        "dropShadow": [{
+          "show": true, "color": { "solid": { "color": "#10182814" } },
+          "position": "Outer", "preset": "Custom",
+          "shadowSpread": 4, "shadowBlur": 14, "angle": 90, "shadowDistance": 4
+        }]
+      }
+    },
+    "card": {
+      "*": {
+        "labels":   [{ "color": { "solid": { "color": "#1F2430" } }, "fontSize": 24, "fontFamily": "Segoe UI Semibold" }],
+        "categoryLabels": [{ "color": { "solid": { "color": "#6B7280" } }, "fontSize": 10 }]
+      }
+    }
+  }
+}
