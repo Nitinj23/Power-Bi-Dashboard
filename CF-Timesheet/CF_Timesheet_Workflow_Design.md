@@ -40,45 +40,43 @@ check) so fewer errors reach the BI stage.
 
 ---
 
-## 3. Timesheet template — what changed vs. the current Wolverine sheet
+## 3. Timesheet template (v2) — structure
 
-Built as a **clean rebuild** (not a modify of the 145-column original) so the
-dropdowns are standard list validations that survive round-trips, instead of the
-current file's "x14" extension validations that break when the file is edited by
-anything other than desktop Excel.
+Built as a **clean rebuild** so dropdowns are standard list validations that
+survive round-trips (the original's "x14" validations break outside desktop Excel).
+Modelled on the real pipeline: **FSTC → FSTC_Split → Data → CF Report**.
 
-Email ask → how it's handled:
+**Header (one sheet = one Vendor / Date / Shift):**
+- **Vendor (Name - ID)** dropdown at the top — the same sheet serves multiple vendors.
+- Single **Date** and **Shift** for the whole sheet (never multiple dates/shifts per sheet).
+- Client (CF Industries), Posting Date, Prepared/Approved By, Sheet #, auto Total Hours.
+- Official CF logo + brand colours.
 
-- **Look similar to current** — same header-band + labor-grid + work-description
-  layout and yellow "populate these" convention.
-- **CF logo** — embedded top-left (placeholder; drop in the official file).
-- **Hide columns that don't serve** — dropped Wolverine-only columns (multi-job
-  allocation blocks, Meal $$, Daily LOA, "Which Column?"). Helper column A is hidden.
-- **Hide the equipment section** — removed entirely.
-- **"Work Order" + expanded yellow** — renamed from "Job/Task Number"; a large
-  free-text yellow WORK ORDER box sits in the header, plus a per-row Work Order
-  column (dropdown from the IW29 list) and a wide Work Order Description column.
-- **More employee rows** — 40 rows; trivially extendable.
-- **Reference tab** — Employees (Name + CF ID + Work Center + default Trade) and
-  Trades → **SAP activity type** mapping (e.g. `Pipefitter – Journeyman → CI203 →
-  CRT CIM PF JM ST`). Straight-time vs double-time are separate activity types.
-- **FAQ tab** — Work-order formatting, Adding employees, Adding roles/trades, the
-  built-in checks, and the daily workflow.
-- **Checks** (email: names, trades, hours vs Lenel):
-  - Employee name not in Reference → cell turns red, CF ID shows `?`.
-  - Trade not mapped → cell turns red, Activity Type shows `?`.
-  - `Lenel Hours` column + auto `Deviation` (booked − swipe); non-zero turns red.
-  - Total Hours > 16 or < 0 → red; RT + DT ≠ Total → amber.
+**Grid — one row per employee × work order:**
+`Employee | Trade (SAP code-name) | PO/Job | WO ID | WO Name (auto) | OP Steps
+(comma list) | DT | RT | Total (auto) | Location | Notes`, then a collapsed
+**Reconciliation** band (Lenel Hrs, Deviation, Swipe Reason, Hold Up).
+- A person charging several WOs gets **one row per WO**; the OP Steps cell lists that
+  WO's steps (e.g. `0392, 0395, 0396`). Hours are split to op-steps downstream.
+- Hidden **WOOP Export Key** builds `WO<id>OP<step>,OP<step>…` — the exact string the
+  FSTC split process reads.
 
-**Seed data:** Employees + activity types from the CIMS example's `Data` tab;
-Work Orders (71) from the IW29 export. All are examples — extend on the Reference /
-Work Orders tabs.
+**Data validation & protection (mirrors the Wolverine sheet):**
+- List dropdowns via named ranges (Vendor, Employee, Trade, PO, WO ID, Location, Shift).
+- Hours validated **decimal ≥ 0**; header dates validated.
+- Sheet is **protected with no password** — every cell locked **except the yellow
+  entry cells**, so derived/formula cells can't be broken (Review ▸ Unprotect to edit layout).
+- **Checks** (conditional formatting): unknown employee/trade/WO → red; hours with no
+  PO or no OP steps → amber; non-zero swipe deviation → red.
+
+**Reference / Work Orders tabs** seed real values pulled from the sample files:
+21 employees, 14 trades (SAP code-name), 37 POs, 44 work orders + an 85-row OP-step master.
 
 ### Open template questions
-1. One sheet per day, or one workbook covering the TA? (drives how rows/dates scale)
-2. Is Work Order per-employee-row (current assumption) or one per sheet?
-3. Do we need the RT/DT split, or does SAP derive rate from the activity type?
-4. Confirm the full trade → activity-type list beyond CIMS pipefitters (B&D, Safeway crafts).
+1. One sheet per day/shift, or a multi-tab workbook per TA week?
+2. Confirm the vendor list (Name + ID) — currently placeholder (Wolverine/B&D/Safeway).
+3. Should WO ID / OP Steps be **cascading** (OP list filtered by WO, DFR-style)?  Doable next.
+4. Employee identifier — name only, or add a per-vendor CF/badge ID for the swipe match?
 
 ---
 
