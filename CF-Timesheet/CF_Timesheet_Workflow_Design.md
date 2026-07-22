@@ -48,14 +48,17 @@ Wolverine workbook itself (not a rebuild), so all formulas, conditional formatti
 the 13 `INDIRECT` dropdowns and 18 lookup Tables are preserved (only 1 unused x14
 validation is dropped).
 
-**What changed vs. the Wolverine file:**
-- Title `WOLVERINE TIMESHEET` → **`CF INDUSTRIES — TA TIMESHEET`**; **CF logo** added top-left.
-- Job-block Client default `Wolverine` → **`CF Industries`**.
-- Everything else identical: Date/Shift + Client/Job Number header block, the employee
-  columns (Employee Name, Position, Total/RT/DT Hours, Work Location, Swipe Deviation,
-  Special Rate, Daily LOA, Which Column?, Meal $$, Meal Order), the horizontal job/PO
-  blocks (R · DT · Hold Up RT · Hold Up DT · Hold Up Type), the Equipment section,
-  the totals row, and the yellow "populate" cells.
+**What changed vs. the Wolverine file (visual only):**
+- **CF logo** top-left; title → **`CF INDUSTRIES TIMESHEET`** in CF green.
+- **CF-green column-header band** (white bold) across the employee columns *and* every
+  job/PO block; teal totals row; gridlines off; header labels in CF green.
+- Job-block Client sample `Wolverine` → **`CF Industries`**.
+- Everything else identical and untouched — no values, formulas, dropdowns, tables,
+  merges, columns, rows, or the freeze panes were changed: Date/Shift + Client/Job Number
+  header block, the employee columns (Employee Name, Position, Total/RT/DT Hours, Work
+  Location, Swipe Deviation, Special Rate, Daily LOA, Which Column?, Meal $$, Meal Order),
+  the horizontal job/PO blocks (R · DT · Hold Up RT · Hold Up DT · Hold Up Type), the
+  Equipment section, the totals row, and the yellow "populate" cells.
 
 WO / OP-step detail is **not** in the entry grid (handled downstream), matching the
 Wolverine R/DT-per-job model.
