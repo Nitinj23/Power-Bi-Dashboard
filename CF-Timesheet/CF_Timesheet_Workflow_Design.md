@@ -14,7 +14,10 @@ Wolverine info and hands it to us in whatever format/time we specify.
 |------|-----------|
 | `CF_Timesheet_Template.xlsx` | Clean, CF-branded rebuild of the Wolverine timesheet (see §3). |
 | `CF_Timesheet_Workflow_Design.md` | This document. |
-| `assets/cf_logo_placeholder.png` | Placeholder logo — swap for the official CF asset. |
+| `assets/cf_logo_official.png` | Official CF logo (extracted from the .pbix). |
+| `powerbi/PowerBI_Model_Notes.md` | Reverse-engineered model + manual rebuild steps. |
+| `powerbi/PowerQuery_Ingestion.m` | Paste-ready M queries (timesheet, Lenel, references). |
+| `powerbi/DAX_Checks.dax` | Paste-ready check measures & row-level flags. |
 
 ---
 

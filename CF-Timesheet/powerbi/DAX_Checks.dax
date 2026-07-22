@@ -1,0 +1,115 @@
+// ============================================================================
+//  CF TA Shop/Fab — data-quality check measures & columns
+//  Implements the email's ask: "checks on employee names, trades, and hours
+//  asked for vs Lenel swipe data."
+//
+//  Assumes these tables exist (created via PowerQuery_Ingestion.m):
+//    Input - CF Timesheet   [EmployeeName],[Trade],[Activity Type],[Work Order],
+//                           [HoursTotal],[HoursRT],[HoursDT],[Date]
+//    Input - Lenel          [CF ID],[EmployeeName],[Date],[LenelHours]
+//    Reference - CF Employees        [Employee Name],[CF ID]
+//    Reference - CF Activity Types   [Trade],[Activity Type]
+//    Input - IW37N Latest   [Order]
+//  Rename references below if your columns differ.
+// ============================================================================
+
+
+// ---------------------------------------------------------------------------
+//  CALCULATED COLUMNS  — add these to 'Input - CF Timesheet'
+//  (Modeling > New Column). They give Hillary a row-level red/green flag.
+// ---------------------------------------------------------------------------
+
+flagInvalidEmployee =
+VAR _name = 'Input - CF Timesheet'[EmployeeName]
+RETURN
+    IF( ISBLANK(_name), 0,
+        IF( NOT( _name IN VALUES( 'Reference - CF Employees'[Employee Name] ) ), 1, 0 ) )
+
+flagInvalidTrade =
+VAR _trade = 'Input - CF Timesheet'[Trade]
+RETURN
+    IF( ISBLANK(_trade), 0,
+        IF( NOT( _trade IN VALUES( 'Reference - CF Activity Types'[Trade] ) ), 1, 0 ) )
+
+flagMissingActivityType =
+IF( ISBLANK('Input - CF Timesheet'[Activity Type])
+    || 'Input - CF Timesheet'[Activity Type] = "?", 1, 0 )
+
+flagUnmatchedWorkOrder =
+VAR _wo = 'Input - CF Timesheet'[Work Order]
+RETURN
+    IF( ISBLANK(_wo), 0,
+        IF( NOT( _wo IN VALUES( 'Input - IW37N Latest'[Order] ) ), 1, 0 ) )
+
+flagHoursSplitMismatch =        // RT + DT should equal Total
+IF( NOT ISBLANK('Input - CF Timesheet'[HoursTotal])
+    && ROUND('Input - CF Timesheet'[HoursRT] + 'Input - CF Timesheet'[HoursDT], 2)
+       <> ROUND('Input - CF Timesheet'[HoursTotal], 2), 1, 0 )
+
+flagAnyError =
+IF( 'Input - CF Timesheet'[flagInvalidEmployee]
+  + 'Input - CF Timesheet'[flagInvalidTrade]
+  + 'Input - CF Timesheet'[flagMissingActivityType]
+  + 'Input - CF Timesheet'[flagUnmatchedWorkOrder]
+  + 'Input - CF Timesheet'[flagHoursSplitMismatch] > 0, 1, 0 )
+
+
+// ---------------------------------------------------------------------------
+//  MEASURES  — add to 'tblMeasuresReporting' (or a new 'tblMeasuresChecks').
+//  Put each on a card; format so > 0 shows red. These drive a "Data Quality" page.
+// ---------------------------------------------------------------------------
+
+msrChkInvalidEmployees =
+CALCULATE( COUNTROWS('Input - CF Timesheet'), 'Input - CF Timesheet'[flagInvalidEmployee] = 1 ) + 0
+
+msrChkInvalidTrades =
+CALCULATE( COUNTROWS('Input - CF Timesheet'), 'Input - CF Timesheet'[flagInvalidTrade] = 1 ) + 0
+
+msrChkMissingActivityType =
+CALCULATE( COUNTROWS('Input - CF Timesheet'), 'Input - CF Timesheet'[flagMissingActivityType] = 1 ) + 0
+
+msrChkUnmatchedWorkOrders =
+CALCULATE( COUNTROWS('Input - CF Timesheet'), 'Input - CF Timesheet'[flagUnmatchedWorkOrder] = 1 ) + 0
+
+msrChkRowsWithErrors =
+CALCULATE( COUNTROWS('Input - CF Timesheet'), 'Input - CF Timesheet'[flagAnyError] = 1 ) + 0
+
+
+// --- Hours booked vs Lenel swipe -------------------------------------------
+// Booked hours (from the timesheet) for the current filter context:
+msrBookedHours =
+SUM( 'Input - CF Timesheet'[HoursTotal] )
+
+// Lenel hours on site for the same employee/day.
+// Relies on a relationship (or the mapping columns) linking CF Timesheet to Lenel
+// by CF ID + Date. If no physical relationship, use TREATAS as shown.
+msrLenelHours =
+SUMX(
+    VALUES( 'Reference - CF Employees'[CF ID] ),
+    CALCULATE(
+        SUM( 'Input - Lenel'[LenelHours] ),
+        TREATAS( VALUES('Input - CF Timesheet'[Date]), 'Input - Lenel'[Date] )
+    )
+)
+
+// Deviation = booked − swiped.  Non-zero (beyond tolerance) is the thing to review.
+msrHoursDeviation =
+[msrBookedHours] - [msrLenelHours]
+
+// Count of employee/day combos whose deviation exceeds a 0.5h tolerance:
+msrChkSwipeDeviations =
+VAR _tol = 0.5
+RETURN
+SUMX(
+    SUMMARIZE(
+        'Input - CF Timesheet',
+        'Input - CF Timesheet'[EmployeeName],
+        'Input - CF Timesheet'[Date]
+    ),
+    VAR _dev = ABS( [msrBookedHours] - [msrLenelHours] )
+    RETURN IF( _dev > _tol, 1, 0 )
+) + 0
+
+// Overall data-quality gate: 0 = clean, ready to allocate & upload.
+msrDataQualityClean =
+IF( [msrChkRowsWithErrors] = 0 && [msrChkSwipeDeviations] = 0, "✔ Clean", "✖ Review needed" )
