@@ -40,44 +40,43 @@ check) so fewer errors reach the BI stage.
 
 ---
 
-## 3. Timesheet template (v3) — PO-sectioned structure
+## 3. Timesheet template (v4) — side-by-side PO tables
 
 Clean rebuild (standard list validations that survive round-trips). Modelled on the
 real pipeline **FSTC → FSTC_Split → Data → CF Report** and on the Wolverine layout.
 
-**Header (one sheet = one Vendor / Date / Shift):**
-- **Vendor (Name - ID)** dropdown, single **Date** and **Shift**, Client, CF logo.
-  (The redundant second header row was removed.)
+**Header (one sheet = one Vendor / Date / Shift):** Vendor (Name - ID), Date, Shift,
+Client, CF logo. Header + Summary are **frozen** on top.
 
-**Summary at top:** a self-updating table of **hours by PO** (RT / DT / Total / entries)
-plus a **Grand Total** — always visible.
+**Summary:** self-updating **hours by PO** (RT / DT / Total / entries) + Grand Total —
+always visible, so you glance at it and submit.
 
-**One collapsible SECTION per PO** (Excel row-groups, summary-above):
-- **Pick the PO once** on the section header (`PO ▸` cell). The header also shows the
-  section's RT / DT / Total, which **stay visible when the section is collapsed**
-  (− / + buttons in the outline gutter).
-- Entry rows: `Employee | Trade | WO ID | OP Step | RT | DT | Total (auto) |
-  Work Location | Offsite Hrs | Notes`.
-- **OP Step is cascading** — its dropdown lists only the op-steps that belong to the
-  chosen WO (per-WO named ranges + `INDIRECT("WO_"&<WO cell>)`).
-- **WO Name is reference only** — shown faint to the right, *outside* the table, so it
-  never becomes a column you submit.
-- Hidden **WOOP Export Key** = `WO<id>OP<step>` per row for the SAP/BI pipeline.
-- Currently 6 PO sections × 10 rows (adjustable).
+**PO tables run LEFT-TO-RIGHT** (each holds ~30 lines, so a busy PO doesn't push the
+others down). Each table is a **collapsible column-group** (hide the table, the Summary
+still shows its totals):
+- **Pick the PO once** on the table header (`PO ▸`); the header carries the table's
+  RT / DT / Total subtotal.
+- Row fields: `Employee | Trade | WO ID | OP1..OP5 | RT | DT | Total (auto) |
+  Work Location | Offsite Hrs | Offsite Category | OT Meal? | LOA? | Notes`.
+- **Multiple OP steps per row** via OP1–OP5, each a **cascading** dropdown showing only
+  the op-steps valid for that row's WO (`INDIRECT("WO_"&<WO cell>)`).
+- **Offsite Category** dropdown (from Reference); **OT Meal? / LOA?** Y-N eligibility flags.
+- **WO Name is reference only** — faint, to the right, outside the table.
+- Hidden **WOOP key** joins the chosen op steps: `WO<id>OP<s1>,OP<s2>…` for the pipeline.
+- Currently 4 PO tables × 30 rows × 5 OP columns (all adjustable).
 
-**Validation & protection (mirrors the Wolverine sheet):**
-- Named-range dropdowns (Vendor, Employee, Trade, PO, WO ID, Location, Shift) + cascading OP.
-- Hours **decimal ≥ 0**; entry cells unlocked and everything else locked (ready to protect —
-  left unprotected by default so the collapse/expand groups work out of the box).
-- Conditional-format checks: unknown employee / trade / WO → red; hours with no op-step → amber.
+**Validation & protection (mirrors the Wolverine sheet):** named-range dropdowns
+(Vendor, Employee, Trade, PO, WO ID, Location, Offsite Category, Y/N) + cascading OP;
+hours **decimal ≥ 0**; entry cells unlocked / rest locked (protection ready, left off so
+the collapse groups work). Checks: unknown employee / trade / WO → red.
 
-**Reference / Work Orders / _OP tabs** seed real values: 21 employees, 14 trades
-(SAP code-name), 37 POs, 44 work orders, and per-WO op-step lists (85 steps) for cascading.
+**Reference / Work Orders / _OP tabs** seed real values: 21 employees, 14 trades, 37 POs,
+44 work orders, per-WO op-step lists (85 steps), plus Offsite-Category and Y/N lists.
 
 ### Open template questions
-1. One sheet per day/shift, or a multi-tab workbook per TA week?
+1. How many PO tables side-by-side / rows each / OP columns? (now 4 × 30 × 5)
 2. Confirm the vendor list (Name + ID) — currently placeholder (Wolverine/B&D/Safeway).
-3. Enough PO sections at 6? (easy to change)  Turn on sheet protection now, or keep it off for editing?
+3. OT Meal? / LOA? — per row (current) or per employee? Should they auto-flag from rules?
 4. Employee identifier — name only, or a per-vendor badge/CF ID for the swipe match?
 
 ---
