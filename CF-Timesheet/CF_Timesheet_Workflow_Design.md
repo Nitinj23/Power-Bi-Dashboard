@@ -40,7 +40,37 @@ check) so fewer errors reach the BI stage.
 
 ---
 
-## 3. Timesheet template (v4) — side-by-side PO tables
+## 3. Timesheet template (v5) — faithful CF rebrand of the Wolverine sheet
+
+Per direction, the template now **keeps the Wolverine "Timesheet" tab exactly** and
+just CF-brands it, rather than re-architecting the layout. Built by editing the
+Wolverine workbook itself (not a rebuild), so all formulas, conditional formatting,
+the 13 `INDIRECT` dropdowns and 18 lookup Tables are preserved (only 1 unused x14
+validation is dropped).
+
+**What changed vs. the Wolverine file:**
+- Title `WOLVERINE TIMESHEET` → **`CF INDUSTRIES — TA TIMESHEET`**; **CF logo** added top-left.
+- Job-block Client default `Wolverine` → **`CF Industries`**.
+- Everything else identical: Date/Shift + Client/Job Number header block, the employee
+  columns (Employee Name, Position, Total/RT/DT Hours, Work Location, Swipe Deviation,
+  Special Rate, Daily LOA, Which Column?, Meal $$, Meal Order), the horizontal job/PO
+  blocks (R · DT · Hold Up RT · Hold Up DT · Hold Up Type), the Equipment section,
+  the totals row, and the yellow "populate" cells.
+
+WO / OP-step detail is **not** in the entry grid (handled downstream), matching the
+Wolverine R/DT-per-job model.
+
+> Earlier explorations — a clean CF rebuild, a PO-sectioned layout, and side-by-side
+> PO tables with cascading OP steps — remain in git history if we ever want them.
+
+### Next steps for this template
+1. Swap the lookup Tables to CF data (employees + CF IDs, trades/positions, and the
+   CF PO/job-number list) — say the word and I'll load them in.
+2. Optionally hide the Equipment section / unused columns and add a Reference + FAQ tab.
+
+### Old open questions (still relevant)
+1. Confirm the vendor list (Name + ID).
+2. Employee identifier — name only, or a per-vendor badge/CF ID for the swipe match?
 
 Clean rebuild (standard list validations that survive round-trips). Modelled on the
 real pipeline **FSTC → FSTC_Split → Data → CF Report** and on the Wolverine layout.
