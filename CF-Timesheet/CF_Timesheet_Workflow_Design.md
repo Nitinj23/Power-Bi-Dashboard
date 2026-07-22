@@ -40,43 +40,45 @@ check) so fewer errors reach the BI stage.
 
 ---
 
-## 3. Timesheet template (v2) — structure
+## 3. Timesheet template (v3) — PO-sectioned structure
 
-Built as a **clean rebuild** so dropdowns are standard list validations that
-survive round-trips (the original's "x14" validations break outside desktop Excel).
-Modelled on the real pipeline: **FSTC → FSTC_Split → Data → CF Report**.
+Clean rebuild (standard list validations that survive round-trips). Modelled on the
+real pipeline **FSTC → FSTC_Split → Data → CF Report** and on the Wolverine layout.
 
 **Header (one sheet = one Vendor / Date / Shift):**
-- **Vendor (Name - ID)** dropdown at the top — the same sheet serves multiple vendors.
-- Single **Date** and **Shift** for the whole sheet (never multiple dates/shifts per sheet).
-- Client (CF Industries), Posting Date, Prepared/Approved By, Sheet #, auto Total Hours.
-- Official CF logo + brand colours.
+- **Vendor (Name - ID)** dropdown, single **Date** and **Shift**, Client, CF logo.
+  (The redundant second header row was removed.)
 
-**Grid — one row per employee × work order:**
-`Employee | Trade (SAP code-name) | PO/Job | WO ID | WO Name (auto) | OP Steps
-(comma list) | DT | RT | Total (auto) | Location | Notes`, then a collapsed
-**Reconciliation** band (Lenel Hrs, Deviation, Swipe Reason, Hold Up).
-- A person charging several WOs gets **one row per WO**; the OP Steps cell lists that
-  WO's steps (e.g. `0392, 0395, 0396`). Hours are split to op-steps downstream.
-- Hidden **WOOP Export Key** builds `WO<id>OP<step>,OP<step>…` — the exact string the
-  FSTC split process reads.
+**Summary at top:** a self-updating table of **hours by PO** (RT / DT / Total / entries)
+plus a **Grand Total** — always visible.
 
-**Data validation & protection (mirrors the Wolverine sheet):**
-- List dropdowns via named ranges (Vendor, Employee, Trade, PO, WO ID, Location, Shift).
-- Hours validated **decimal ≥ 0**; header dates validated.
-- Sheet is **protected with no password** — every cell locked **except the yellow
-  entry cells**, so derived/formula cells can't be broken (Review ▸ Unprotect to edit layout).
-- **Checks** (conditional formatting): unknown employee/trade/WO → red; hours with no
-  PO or no OP steps → amber; non-zero swipe deviation → red.
+**One collapsible SECTION per PO** (Excel row-groups, summary-above):
+- **Pick the PO once** on the section header (`PO ▸` cell). The header also shows the
+  section's RT / DT / Total, which **stay visible when the section is collapsed**
+  (− / + buttons in the outline gutter).
+- Entry rows: `Employee | Trade | WO ID | OP Step | RT | DT | Total (auto) |
+  Work Location | Offsite Hrs | Notes`.
+- **OP Step is cascading** — its dropdown lists only the op-steps that belong to the
+  chosen WO (per-WO named ranges + `INDIRECT("WO_"&<WO cell>)`).
+- **WO Name is reference only** — shown faint to the right, *outside* the table, so it
+  never becomes a column you submit.
+- Hidden **WOOP Export Key** = `WO<id>OP<step>` per row for the SAP/BI pipeline.
+- Currently 6 PO sections × 10 rows (adjustable).
 
-**Reference / Work Orders tabs** seed real values pulled from the sample files:
-21 employees, 14 trades (SAP code-name), 37 POs, 44 work orders + an 85-row OP-step master.
+**Validation & protection (mirrors the Wolverine sheet):**
+- Named-range dropdowns (Vendor, Employee, Trade, PO, WO ID, Location, Shift) + cascading OP.
+- Hours **decimal ≥ 0**; entry cells unlocked and everything else locked (ready to protect —
+  left unprotected by default so the collapse/expand groups work out of the box).
+- Conditional-format checks: unknown employee / trade / WO → red; hours with no op-step → amber.
+
+**Reference / Work Orders / _OP tabs** seed real values: 21 employees, 14 trades
+(SAP code-name), 37 POs, 44 work orders, and per-WO op-step lists (85 steps) for cascading.
 
 ### Open template questions
 1. One sheet per day/shift, or a multi-tab workbook per TA week?
 2. Confirm the vendor list (Name + ID) — currently placeholder (Wolverine/B&D/Safeway).
-3. Should WO ID / OP Steps be **cascading** (OP list filtered by WO, DFR-style)?  Doable next.
-4. Employee identifier — name only, or add a per-vendor CF/badge ID for the swipe match?
+3. Enough PO sections at 6? (easy to change)  Turn on sheet protection now, or keep it off for editing?
+4. Employee identifier — name only, or a per-vendor badge/CF ID for the swipe match?
 
 ---
 
