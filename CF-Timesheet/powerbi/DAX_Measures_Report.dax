@@ -1,0 +1,29 @@
+// ============================================================================
+//  DAX measures for the printable timesheet report
+//  Add to the 'Timesheets' table (Query 2). Put each on the report visual.
+// ============================================================================
+
+RT Hours   = SUM ( Timesheets[RT Hrs] )
+DT Hours   = SUM ( Timesheets[DT Hrs] )
+Total Hours = SUM ( Timesheets[Total Hrs] )
+Offsite Hours = SUM ( Timesheets[Offsite Hrs] )
+
+// If you build the report from the op-step SPLIT table instead, rebuild the
+// "OP Steps" list per Employee/WO with:
+OP Steps List =
+CONCATENATEX (
+    VALUES ( TimesheetsSplit[Op Step] ),
+    TimesheetsSplit[Op Step],
+    ", ",
+    TimesheetsSplit[Op Step], ASC
+)
+
+// Data-quality helpers for the report header (optional)
+Rows Missing WO Name =
+CALCULATE ( COUNTROWS ( Timesheets ), ISBLANK ( Timesheets[WO Name] ) )
+
+Grand Total Hours = [Total Hours]   // shows at the matrix grand-total row
+
+// A single "Client / date" caption for the printout title
+Report Title =
+"Client: CF Industries   |   " & FORMAT ( MAX ( Timesheets[Date] ), "dd-MMM-yy" )
