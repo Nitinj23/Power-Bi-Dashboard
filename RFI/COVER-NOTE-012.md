@@ -17,8 +17,9 @@
   7 notes and no Note 9, so the RFI cites Sheets 1 and 2 only):
   "REMOVE INSULATION AND INSTALL CS ASC RISER CLAMP FIG.40. RISER SHOULD REST ON
   STEEL. RE-INSULATE PIPING TO MATCH EXISTING."
-- Ratings at 4" NPS: Fig. 40 = 2,200 lb rigid assembly / 4,400 lb spring;
-  Fig. 261 = 750 lb. The RFI quotes the rigid figure, the like-for-like case.
+- Load ratings are deliberately NOT quoted in the RFI. The text states only that
+  the Fig. 261 carries a lower rating and refers the reader to the attached data
+  sheets, which carry the published figures.
 - Fig. 40 data sheet, Service: "Load is carried by shear lugs which are welded to
   the pipe. Shear lugs provided upon request. Local pipe wall stress evaluation
   available upon request."
