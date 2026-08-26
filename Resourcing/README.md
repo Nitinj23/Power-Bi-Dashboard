@@ -5,9 +5,11 @@
 Built in response to Ken Barrett's request for a resource-loaded schedule,
 week by week, September to year end.
 
+No instructions tab — guidance is a one-line legend on row 2 of each PM tab,
+and the covering email carries the rest.
+
 ## Structure
 
-- **Instructions** — legend and a worked example of a filled row
 - **Summary - Trade** — FTE by Trade x Week Ending. 100% formula driven
 - **Summary - Client** — FTE by Client x Week Ending. 100% formula driven
 - **11 PM tabs** — one per PM, pre-loaded with their active jobs
